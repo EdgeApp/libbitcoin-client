@@ -38,10 +38,11 @@ public:
 
     /**
      * Connects to a remote server.
+     * @param key optional key for encrypted servers.
      * @return false if something went wrong. The socket will be unusable
      * in that case.
      */
-    BC_API bool connect(const std::string& address);
+    BC_API bool connect(const std::string& address, const std::string& key="");
 
     /**
      * Begins listening for incoming connections.

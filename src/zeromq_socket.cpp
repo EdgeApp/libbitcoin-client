@@ -18,6 +18,8 @@
  */
 #include <bitcoin/client/zeromq_socket.hpp>
 
+#include <zmq_utils.h>
+
 namespace libbitcoin {
 namespace client {
 
@@ -39,9 +41,26 @@ zeromq_socket::zeromq_socket(void* context, int type)
     }
 }
 
-bool zeromq_socket::connect(const std::string& address)
+bool zeromq_socket::connect(const std::string& address, const std::string& key)
 {
-    return socket_ && 0 <= zmq_connect(socket_, address.c_str());
+    if (!socket_)
+        return false;
+
+    if (key.size())
+    {
+        char public_key[41];
+        char secret_key[41];
+        if (zmq_curve_keypair(public_key, secret_key) < 0)
+            return false;
+        if (zmq_setsockopt(socket_, ZMQ_CURVE_PUBLICKEY, public_key, strlen(public_key)) < 0)
+            return false;
+        if (zmq_setsockopt(socket_, ZMQ_CURVE_SECRETKEY, secret_key, strlen(secret_key)) < 0)
+            return false;
+        if (zmq_setsockopt(socket_, ZMQ_CURVE_SERVERKEY, key.c_str(), key.size()) < 0)
+            return false;
+    }
+
+    return 0 <= zmq_connect(socket_, address.c_str());
 }
 
 bool zeromq_socket::bind(const std::string& address)

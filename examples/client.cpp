@@ -143,7 +143,7 @@ void cli::cmd_help()
     std::cout << "commands:" << std::endl;
     std::cout << "  exit              - leave the program" << std::endl;
     std::cout << "  help              - this menu" << std::endl;
-    std::cout << "  connect <server>  - connect to a server" << std::endl;
+    std::cout << "  connect <server> [key]  - connect to a server" << std::endl;
     std::cout << "  disconnect        - disconnect from the server" << std::endl;
     std::cout << "  height            - get last block height" << std::endl;
     std::cout << "  history <address> - get an address' history" << std::endl;
@@ -156,9 +156,14 @@ void cli::cmd_connect(std::stringstream& args)
         return;
     std::cout << "connecting to " << server << std::endl;
 
+    std::string key;
+    args >> key;
+    if (key.size())
+        std::cout << "key: " << key << std::endl;
+
     delete connection_;
     connection_ = new connection(context_);
-    if (!connection_->socket.connect(server))
+    if (!connection_->socket.connect(server, key))
     {
         std::cout << "error: failed to connect" << std::endl;
         delete connection_;
